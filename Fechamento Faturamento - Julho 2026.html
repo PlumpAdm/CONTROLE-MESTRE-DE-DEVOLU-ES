@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fechamento de Faturamento — Julho/2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0B0E14;
+    --panel: #131826;
+    --panel-border: #212838;
+    --text: #E6E9F0;
+    --text-dim: #8891A5;
+    --accent: #6C8CFF;
+    --accent-2: #34D399;
+    --accent-3: #F5A524;
+    --accent-4: #F87171;
+    --accent-5: #C084FC;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  }
+  .header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-dim); font-size: 12.5px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; margin: 28px 0 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 8px; }
+  .kpi {
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 12px;
+    padding: 18px 18px;
+  }
+  .kpi .value { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1.15; }
+  .kpi .label { font-size: 11.5px; color: var(--text-dim); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .kpi.green .value { color: var(--accent-2); }
+  .kpi.red .value { color: var(--accent-4); }
+  .kpi.amber .value { color: var(--accent-3); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 12px; padding: 18px;
+  }
+  .card h2 { font-size: 12.5px; margin: 0 0 14px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .chart-wrap { position: relative; height: 220px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: right; padding: 10px 8px; border-bottom: 1px solid var(--panel-border); }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; font-weight: 600; }
+  tr.total td { font-weight: 700; border-top: 1px solid var(--panel-border); border-bottom: none; }
+  td.loja { font-weight: 600; }
+  .filter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .filter-row label { font-size: 12.5px; color: var(--text-dim); }
+  select#motivoFiltro {
+    background: var(--bg); color: var(--text); border: 1px solid var(--accent);
+    border-radius: 8px; padding: 8px 12px; font-size: 13.5px; min-width: 220px;
+  }
+  .note { font-size: 11.5px; color: var(--text-dim); margin: -4px 0 14px; }
+  @media (max-width: 1000px) { .kpis { grid-template-columns: 1fr 1fr; } .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Fechamento de Faturamento — Julho/2026</h1>
+    <div class="subtitle">Vendas (UpSeller — Resumo por Loja) + Devoluções (Mestre de Controle) · gerado em 05/08/2026</div>
+  </div>
+
+  <div class="section-title">Resumo do mês</div>
+  <div class="kpis">
+    <div class="kpi"><div class="value">R$ 136.968,82</div><div class="label">Valor de vendas válidas</div></div>
+    <div class="kpi"><div class="value">1.304</div><div class="label">Pedidos válidos</div></div>
+    <div class="kpi red"><div class="value">78</div><div class="label">Pedidos cancelados</div></div>
+    <div class="kpi red"><div class="value">R$ 7.752,33</div><div class="label">Valor de vendas canceladas</div></div>
+    <div class="kpi amber"><div class="value">169</div><div class="label">Total de devoluções</div></div>
+    <div class="kpi amber"><div class="value">R$ 17.624,85</div><div class="label">Valor total de devoluções</div></div>
+    <div class="kpi"><div class="value">R$ 144.721,15</div><div class="label">Valor total de vendas (bruto)</div></div>
+    <div class="kpi"><div class="value">12,9%</div><div class="label">Taxa de devolução (sobre vendas válidas)</div></div>
+  </div>
+
+  <div class="section-title">Por loja</div>
+  <div class="grid">
+    <div class="card">
+      <h2>Valor de vendas válidas por loja</h2>
+      <div class="chart-wrap"><canvas id="chartValorValido"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Pedidos válidos por loja</h2>
+      <div class="chart-wrap"><canvas id="chartPedidosValido"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Valor de vendas canceladas por loja</h2>
+      <div class="chart-wrap"><canvas id="chartValorCancelado"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Pedidos cancelados por loja</h2>
+      <div class="chart-wrap"><canvas id="chartPedidosCancelado"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <h2>Detalhe por loja</h2>
+    <table id="tabela"></table>
+  </div>
+
+  <div class="section-title">Devolução por loja</div>
+  <div class="note">A partir de julho/2026 a planilha de devoluções passou a registrar também a conta específica de Mercado Livre (coluna "Loja/Conta"), cruzada com o export de pedidos do UpSeller. Agora a granularidade bate com a do relatório de vendas por loja.</div>
+  <div class="grid">
+    <div class="card">
+      <h2>Valor de devolução por loja</h2>
+      <div class="chart-wrap"><canvas id="chartDevolValor"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Quantidade de devoluções por loja</h2>
+      <div class="chart-wrap"><canvas id="chartDevolQtd"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">Devolução por motivo</div>
+  <div class="card">
+    <div class="filter-row">
+      <label for="motivoFiltro">Filtrar por motivo:</label>
+      <select id="motivoFiltro">
+        <option value="Todos">Todos os motivos</option>
+      </select>
+    </div>
+    <table id="tabelaDevolucao"></table>
+  </div>
+
+<script>
+const LOJAS = [
+  { loja: "Shopee",                      pedidosValidos: 798, valorValido: 92330.00, pedidosCancelados: 17, valorCancelado: 2068.72 },
+  { loja: "Mercado Livre Plump",         pedidosValidos: 470, valorValido: 41439.60, pedidosCancelados: 58, valorCancelado: 5428.01 },
+  { loja: "Mercado Livre JR da Silva",   pedidosValidos: 26,  valorValido: 2293.68,  pedidosCancelados: 2,  valorCancelado: 162.86 },
+  { loja: "Mercado Livre Gabriel",       pedidosValidos: 7,   valorValido: 606.93,   pedidosCancelados: 1,  valorCancelado: 92.74 },
+  { loja: "TikTok Shop",                 pedidosValidos: 3,   valorValido: 298.61,   pedidosCancelados: 0,  valorCancelado: 0.00 },
+  { loja: "Loja Padrão",                 pedidosValidos: 0,   valorValido: 0.00,     pedidosCancelados: 0,  valorCancelado: 0.00 },
+];
+const RESUMO = { pedidosValidos: 1304, valorValido: 136968.82, pedidosCancelados: 78, valorCancelado: 7752.33 };
+
+// Devoluções de julho/2026, por Loja/Conta x Categoria do Motivo (fonte: Mestre_Devolucoes.xlsx, coluna Loja/Conta)
+const DEVOLUCOES = [
+  { loja: "Shopee",                     motivo: "Produto Errado", qtd: 9,  valor: 871.35 },
+  { loja: "Shopee",                     motivo: "Não Serviu",     qtd: 86, valor: 9549.90 },
+  { loja: "Shopee",                     motivo: "Não Gostou",     qtd: 1,  valor: 79.90 },
+  { loja: "Shopee",                     motivo: "Desistência",    qtd: 13, valor: 1593.61 },
+  { loja: "Shopee",                     motivo: "Defeito",        qtd: 1,  valor: 94.91 },
+  { loja: "Shopee",                     motivo: "Não Recebido",   qtd: 1,  valor: 139.88 },
+  { loja: "Mercado Livre Plump",        motivo: "Desistência",    qtd: 50, valor: 4476.21 },
+  { loja: "Mercado Livre Plump",        motivo: "Não Serviu",     qtd: 4,  valor: 484.50 },
+  { loja: "Mercado Livre JR da Silva",  motivo: "Desistência",    qtd: 3,  valor: 241.85 },
+  { loja: "Mercado Livre Gabriel",      motivo: "Desistência",    qtd: 1,  valor: 92.74 },
+];
+const LOJAS_DEVOLUCAO = ["Shopee", "Mercado Livre Plump", "Mercado Livre JR da Silva", "Mercado Livre Gabriel", "TikTok Shop"];
+const MOTIVOS = ["Produto Errado", "Defeito", "Não Serviu", "Desistência", "Não Gostou", "Não Recebido"];
+
+const fmtBRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+Chart.defaults.color = '#8891A5';
+Chart.defaults.borderColor = '#212838';
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+
+const palette = ['#6C8CFF','#34D399','#F5A524','#F87171','#C084FC','#38BDF8'];
+const lojasComDados = LOJAS.filter(l => l.pedidosValidos > 0 || l.valorValido > 0 || l.pedidosCancelados > 0 || l.valorCancelado > 0);
+
+function barChart(id, labels, data, color, isCurrency) {
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: color, borderRadius: 4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => isCurrency ? fmtBRL(ctx.raw) : ctx.raw } }
+      },
+      scales: {
+        x: { beginAtZero: true, grid: { color: '#1A2030' }, ticks: { callback: v => isCurrency ? fmtBRL(v) : v } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+barChart('chartValorValido', lojasComDados.map(l => l.loja), lojasComDados.map(l => l.valorValido), palette[0], true);
+barChart('chartPedidosValido', lojasComDados.map(l => l.loja), lojasComDados.map(l => l.pedidosValidos), palette[1], false);
+barChart('chartValorCancelado', lojasComDados.map(l => l.loja), lojasComDados.map(l => l.valorCancelado), palette[3], true);
+barChart('chartPedidosCancelado', lojasComDados.map(l => l.loja), lojasComDados.map(l => l.pedidosCancelados), palette[3], false);
+
+const tabela = document.getElementById('tabela');
+let html = '<tr><th>Loja</th><th>Pedidos válidos</th><th>Valor vendas válidas</th><th>Pedidos cancelados</th><th>Valor vendas canceladas</th></tr>';
+LOJAS.forEach(l => {
+  html += `<tr><td class="loja">${l.loja}</td><td>${l.pedidosValidos}</td><td>${fmtBRL(l.valorValido)}</td><td>${l.pedidosCancelados}</td><td>${fmtBRL(l.valorCancelado)}</td></tr>`;
+});
+html += `<tr class="total"><td>Resumo</td><td>${RESUMO.pedidosValidos}</td><td>${fmtBRL(RESUMO.valorValido)}</td><td>${RESUMO.pedidosCancelados}</td><td>${fmtBRL(RESUMO.valorCancelado)}</td></tr>`;
+tabela.innerHTML = html;
+
+// --- Devolução por loja (agregado, todos os motivos) ---
+function devolPorLoja(lista) {
+  return LOJAS_DEVOLUCAO.map(loja => {
+    const linhas = lista.filter(d => d.loja === loja);
+    return {
+      loja,
+      qtd: linhas.reduce((acc, d) => acc + d.qtd, 0),
+      valor: linhas.reduce((acc, d) => acc + d.valor, 0),
+    };
+  });
+}
+
+const devolLojaTotal = devolPorLoja(DEVOLUCOES);
+
+barChart('chartDevolValor', devolLojaTotal.map(l => l.loja), devolLojaTotal.map(l => l.valor), palette[3], true);
+barChart('chartDevolQtd', devolLojaTotal.map(l => l.loja), devolLojaTotal.map(l => l.qtd), palette[2], false);
+
+// --- Filtro por motivo ---
+const select = document.getElementById('motivoFiltro');
+MOTIVOS.forEach(m => {
+  const opt = document.createElement('option');
+  opt.value = m; opt.textContent = m;
+  select.appendChild(opt);
+});
+
+function renderTabelaDevolucao(motivoSelecionado) {
+  const lista = motivoSelecionado === 'Todos' ? DEVOLUCOES : DEVOLUCOES.filter(d => d.motivo === motivoSelecionado);
+  const porLoja = devolPorLoja(lista);
+  const totalQtd = porLoja.reduce((acc, l) => acc + l.qtd, 0);
+  const totalValor = porLoja.reduce((acc, l) => acc + l.valor, 0);
+
+  let h = '<tr><th>Loja</th><th>Qtd. de devoluções</th><th>Valor devolvido</th></tr>';
+  porLoja.forEach(l => {
+    h += `<tr><td class="loja">${l.loja}</td><td>${l.qtd}</td><td>${fmtBRL(l.valor)}</td></tr>`;
+  });
+  h += `<tr class="total"><td>Total (${motivoSelecionado === 'Todos' ? 'todos os motivos' : motivoSelecionado})</td><td>${totalQtd}</td><td>${fmtBRL(totalValor)}</td></tr>`;
+  document.getElementById('tabelaDevolucao').innerHTML = h;
+}
+
+select.addEventListener('change', () => renderTabelaDevolucao(select.value));
+renderTabelaDevolucao('Todos');
+</script>
+</body>
+</html>
